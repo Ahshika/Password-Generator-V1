@@ -1,16 +1,77 @@
-# React + Vite
+# NightGold Password Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A desktop password tool built with **Electron**, **React**, and **Tailwind CSS**. Generate customizable passwords on the fly, then manage saved credentials in a local vault protected by **TOTP (2FA)** and **AES-256-CBC** encryption.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Password generator** — length 8–64; uppercase, numbers, symbols, optional Arabic characters; one-click copy
+- **Local password vault** — save site, username, and password; unlock with authenticator code
+- **Encrypted storage** — passwords encrypted at rest in SQLite (`userData/passwords.sqlite`)
+- **Bilingual UI** — Arabic (RTL) and English
+- **Windows installer** — packaged with electron-builder (NSIS)
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Electron · React · Vite · Tailwind CSS · SQLite3 · Speakeasy (TOTP) · i18next
 
-## Expanding the ESLint configuration
+## Screenshots
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Password generator | Password vault (TOTP) |
+| --- | --- |
+| ![Password generator](docs/screenshots/generator.png) | ![Password vault](docs/screenshots/vault.png) |
+
+_Add your own screenshots as `docs/screenshots/generator.png` and `docs/screenshots/vault.png`, or replace these paths after capturing the app._
+
+## Getting started
+
+```bash
+npm install
+npm run dev      # development
+npm run build    # production + Windows installer → release/
+```
+
+## Security notes
+
+This is a portfolio / learning project. Before using it with real secrets:
+
+- Password generation uses `Math.random()` rather than `crypto.getRandomValues` — upgrade for production use
+- The encryption key is stored in the same SQLite database as the ciphertext
+- The TOTP secret is embedded in source — replace with per-user setup before any public release
+
+## Disclaimer
+
+Review security practices before using with real secrets in production.
+
+---
+
+## العربية
+
+# NightGold — مدير كلمات المرور
+
+تطبيق سطح مكتب لتوليد كلمات مرور قابلة للتخصيص وإدارة بيانات الدخول محليًا، مع خزنة محمية برمز **TOTP** وتشفير **AES-256-CBC**.
+
+### المميزات
+
+- مولّد كلمات مرور (8–64 حرفًا، خيارات أحرف وأرقام ورموز وحروف عربية)
+- خزنة محلية مع فتح بالمصادقة الثنائية
+- تخزين مشفّر في SQLite
+- واجهة عربية/إنجليزية مع دعم RTL
+- مثبّت Windows (NSIS)
+
+### التشغيل
+
+```bash
+npm install
+npm run dev
+npm run build
+```
+
+---
+
+## GitHub topics
+
+`electron` `react` `vite` `tailwindcss` `password-manager` `password-generator` `desktop-app` `sqlite` `totp` `i18n` `arabic` `windows`
+
+## Social copy
+
+Ready-to-paste text for GitHub About and LinkedIn is in [docs/GITHUB_LINKEDIN.md](docs/GITHUB_LINKEDIN.md).

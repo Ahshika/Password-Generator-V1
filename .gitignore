@@ -1,0 +1,9 @@
+# Build artifacts and dependencies (any nested folder)
+**/node_modules/
+**/temp-asar/
+**/dist/
+**/dist-ssr/
+**/dist-electron/
+**/release/
+stdout.txt
+stderr.txt

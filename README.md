@@ -1,6 +1,6 @@
-# NightGold Password Manager
+# NightGold V1 — Password Generator & Vault
 
-A desktop password tool built with **Electron**, **React**, and **Tailwind CSS**. Generate customizable passwords on the fly, then manage saved credentials in a local vault protected by **TOTP (2FA)** and **AES-256-CBC** encryption.
+The first version of [NightGold](https://github.com/Ahshika/NightGold-Password-Manager). A desktop password tool built with **Electron**, **React**, and **Tailwind CSS**. Generate customizable passwords on the fly, then manage saved credentials in a local vault protected by **TOTP (2FA)** and **AES-256-CBC** encryption.
 
 ## Features
 
@@ -16,11 +16,17 @@ Electron · React · Vite · Tailwind CSS · SQLite3 · Speakeasy (TOTP) · i18n
 
 ## Screenshots
 
-| Password generator | Password vault (TOTP) |
-| --- | --- |
-| ![Password generator](docs/screenshots/generator.png) | ![Password vault](docs/screenshots/vault.png) |
+![Generator and unlocked vault](docs/screenshots/vault.png)
 
-_Add your own screenshots as `docs/screenshots/generator.png` and `docs/screenshots/vault.png`, or replace these paths after capturing the app._
+| Generator with the vault locked | Arabic interface (RTL) |
+| --- | --- |
+| ![Password generator](docs/screenshots/generator.png) | ![Arabic interface](docs/screenshots/arabic.png) |
+
+<sub>Screenshots use made-up demo data.</sub>
+
+## Versions
+
+**V1** → [V2](https://github.com/Ahshika/Password-Generator-V2) → [V3 (NightGold Password Manager & File Locker)](https://github.com/Ahshika/NightGold-Password-Manager)
 
 ## Getting started
 

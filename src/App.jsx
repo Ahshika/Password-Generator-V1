@@ -7,6 +7,7 @@ function App() {
   const [token, setToken] = useState('');
   const [passwords, setPasswords] = useState([]);
   const [isManagerLocked, setIsManagerLocked] = useState(true);
+  const [totpSetup, setTotpSetup] = useState(null);
   
   // Form states
   const [newSite, setNewSite] = useState('');
@@ -30,8 +31,17 @@ function App() {
     setPasswords(data);
   };
 
+  useEffect(() => {
+    window.electronAPI.getTotpSetup().then(setTotpSetup);
+  }, []);
+
   const handleLogin = async () => {
-    const verified = await window.electronAPI.verifyTotpLogin(token);
+    const needsSetup = totpSetup && !totpSetup.configured;
+    const verified = needsSetup
+      ? await window.electronAPI.verifyTotpSetup(token.trim())
+      : await window.electronAPI.verifyTotpLogin(token.trim());
+    if (verified && needsSetup) setTotpSetup({ configured: true });
+    setToken('');
     if (verified) {
       setIsManagerLocked(false);
       loadPasswords();
@@ -159,7 +169,16 @@ function App() {
             {isManagerLocked ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8">
                 <Key className="w-16 h-16 text-gold-500 mb-6 opacity-80" />
-                <h2 className="text-xl font-semibold mb-6 text-center text-gold-400">Unlock Database</h2>
+                <h2 className="text-xl font-semibold mb-6 text-center text-gold-400">
+                  {totpSetup && !totpSetup.configured ? t('Set Up Authenticator') : 'Unlock Database'}
+                </h2>
+                {totpSetup && !totpSetup.configured && (
+                  <div className="mb-6 flex flex-col items-center">
+                    <img src={totpSetup.qr} alt="Authenticator QR code" className="w-44 h-44 rounded-lg bg-white p-2" />
+                    <p className="mt-3 text-xs text-gray-400 text-center max-w-xs">{t('Scan this QR code with your Authenticator app, then enter the code it shows.')}</p>
+                    <code className="mt-2 text-xs text-gold-400 break-all select-all">{totpSetup.secret}</code>
+                  </div>
+                )}
                 <input 
                   type="text" 
                   placeholder={t('Enter Code')}

@@ -68,19 +68,60 @@ async function decrypt(encryptedText, ivHex) {
 }
 
 // IPC Handlers
-// Hardcoded secret for the single database owner
-const MASTER_TOTP_SECRET = 'FFTHSKCSEYWDIN2HK5MF4WTVFRDTG6TBGMXXKSTJJ5TEW42LJUUQ';
+// TOTP: each install creates its own secret on first run (stored in the local settings table)
+// and the owner scans it into an Authenticator app. Nothing secret lives in the source code.
+let pendingTotpSecret = null;
+let unlocked = false;
+
+function getSetting(key) {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT value FROM settings WHERE key = ?', [key], (err, row) => (err ? reject(err) : resolve(row ? row.value : null)));
+  });
+}
+
+function setSetting(key, value) {
+  return new Promise((resolve, reject) => {
+    db.run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, value], (err) => (err ? reject(err) : resolve()));
+  });
+}
+
+function isValidToken(token) {
+  return typeof token === 'string' && /^\d{6}$/.test(token);
+}
+
+function requireUnlocked() {
+  if (!unlocked) throw new Error('Password manager is locked');
+}
+
+ipcMain.handle('get-totp-setup', async () => {
+  if (await getSetting('totp_secret')) return { configured: true };
+  if (!pendingTotpSecret) pendingTotpSecret = speakeasy.generateSecret({ length: 20, name: 'Password Generator V1' });
+  return {
+    configured: false,
+    secret: pendingTotpSecret.base32,
+    qr: await qrcode.toDataURL(pendingTotpSecret.otpauth_url),
+  };
+});
+
+ipcMain.handle('verify-totp-setup', async (_, token) => {
+  if (!pendingTotpSecret || !isValidToken(token) || (await getSetting('totp_secret'))) return false;
+  const ok = speakeasy.totp.verify({ secret: pendingTotpSecret.base32, encoding: 'base32', token, window: 1 });
+  if (!ok) return false;
+  await setSetting('totp_secret', pendingTotpSecret.base32);
+  pendingTotpSecret = null;
+  unlocked = true;
+  return true;
+});
 
 ipcMain.handle('verify-totp-login', async (_, token) => {
-  return speakeasy.totp.verify({
-    secret: MASTER_TOTP_SECRET,
-    encoding: 'base32',
-    token: token,
-    window: 1
-  });
+  const secret = await getSetting('totp_secret');
+  if (!secret || !isValidToken(token)) return false;
+  unlocked = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
+  return unlocked;
 });
 
 ipcMain.handle('get-passwords', async () => {
+  requireUnlocked();
   return new Promise((resolve, reject) => {
     db.all("SELECT * FROM passwords", async (err, rows) => {
       if (err) return reject(err);
@@ -99,6 +140,7 @@ ipcMain.handle('get-passwords', async () => {
 });
 
 ipcMain.handle('add-password', async (_, site, username, password) => {
+  requireUnlocked();
   const { encrypted, iv } = await encrypt(password);
   return new Promise((resolve, reject) => {
     db.run("INSERT INTO passwords (site, username, encrypted_password, iv) VALUES (?, ?, ?, ?)", 
@@ -112,6 +154,7 @@ ipcMain.handle('add-password', async (_, site, username, password) => {
 });
 
 ipcMain.handle('delete-password', async (_, id) => {
+  requireUnlocked();
   return new Promise((resolve, reject) => {
     db.run("DELETE FROM passwords WHERE id = ?", [id], (err) => {
       if (err) reject(err);

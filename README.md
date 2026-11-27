@@ -42,7 +42,7 @@ This is a portfolio / learning project. Before using it with real secrets:
 
 - Password generation uses `Math.random()` rather than `crypto.getRandomValues` — upgrade for production use
 - The encryption key is stored in the same SQLite database as the ciphertext
-- The TOTP secret is embedded in source — replace with per-user setup before any public release
+- On first run the app creates its own TOTP secret and shows a QR code to scan into an Authenticator app (no secret in source)
 
 ## Disclaimer
 
